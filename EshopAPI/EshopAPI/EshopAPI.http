@@ -1,6 +1,85 @@
-@EshopAPI_HostAddress = http://localhost:5186
+@EshopAPI_HostAddress = https://localhost:7066
 
-GET {{EshopAPI_HostAddress}}/weatherforecast/
-Accept: application/json
+@id=1
+
+
+GET {{EshopAPI_HostAddress}}/api/v1/products
+
+############################################################
+
+GET {{EshopAPI_HostAddress}}/api/v1/products/{{id}}
+
+############################################################
+
+POST {{EshopAPI_HostAddress}}/api/v1/products
+Content-Type: application/json
+{
+  "name": "Test Product",
+  "mainimageurl": "test.com/img.png"
+}
 
 ###
+
+POST {{EshopAPI_HostAddress}}/api/v1/products
+Content-Type: application/json
+{
+  "name": "Test Product",
+  "mainimageurl": "test.com/img.png",
+  "price": 219.90
+}
+
+###
+
+POST {{EshopAPI_HostAddress}}/api/v1/products
+Content-Type: application/json
+{
+  "name": "Test Product Two",
+  "mainimageurl": "test.com/img.png",
+  "price": 564.90,
+  "quantity": 99
+}
+
+############################################################
+
+PATCH {{EshopAPI_HostAddress}}/api/v1/products/{{id}}
+Content-Type: application/json
+{
+  "name": "Test Product One",
+  "quantity": 99
+}
+
+############################################################
+
+PUT {{EshopAPI_HostAddress}}/api/v1/products/{{id}}/quantity?quantity_delta=15
+
+###
+
+PUT {{EshopAPI_HostAddress}}/api/v1/products/{{id}}/quantity?quantity_delta=-15
+
+
+############################################################
+############################################################
+############################################################
+############################################################
+
+
+GET {{EshopAPI_HostAddress}}/api/v2/products
+
+############################################################
+
+PATCH {{EshopAPI_HostAddress}}/api/v2/products/{{id}}
+Content-Type: application/json
+{
+  "name": "Test Product One",
+  "quantity": 99
+}
+
+############################################################
+
+PUT {{EshopAPI_HostAddress}}/api/v2/products/{{id}}/quantity?quantity_delta=15
+
+###
+
+PUT {{EshopAPI_HostAddress}}/api/v2/products/{{id}}/quantity?quantity_delta=-15
+
+############################################################
