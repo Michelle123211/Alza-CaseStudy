@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EshopAPI.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EshopAPI.Endpoints.v1;
 
@@ -57,13 +58,15 @@ public static class ProductsEndpointsV1 {
 	}
 
 	// Creates a new product with the given details.
-	internal static async Task<IResult> CreateProduct() { // TODO: ProductCreateDto
+	internal static async Task<IResult> CreateProduct(
+			[FromBody] ProductCreateDto product) {
 		return TypedResults.Forbid();
 	}
 
 	// Updates details of a product with the given ID.
 	internal static async Task<IResult> UpdateProduct(
-			[FromRoute] int id) { // TODO: ProductUpdateDto
+			[FromRoute] int id,
+			[FromBody] ProductUpdateDto productUpdate) {
 		return TypedResults.Forbid();
 	}
 
