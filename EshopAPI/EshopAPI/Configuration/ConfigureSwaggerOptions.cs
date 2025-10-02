@@ -20,8 +20,8 @@ public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
 	public void Configure(string? name, SwaggerGenOptions options) {
 		foreach (var description in provider.ApiVersionDescriptions) {
 			var openApiInfo = new OpenApiInfo() {
-				Title = $"E-shop API v{description.ApiVersion}",
-				Version = description.ApiVersion.ToString()
+				Title = $"E-shop API",
+				Version = $"v{description.ApiVersion}"
 			};
 			options.SwaggerDoc(description.GroupName, openApiInfo);
 		}

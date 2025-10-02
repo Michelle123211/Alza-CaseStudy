@@ -44,7 +44,7 @@ if (app.Environment.IsDevelopment()) {
     app.UseSwaggerUI(options => {
 		var descriptions = app.DescribeApiVersions();
 		foreach (var desc in descriptions) {
-			options.SwaggerEndpoint($"/swagger/{desc.GroupName}/swagger.json", desc.GroupName.ToUpperInvariant());
+			options.SwaggerEndpoint($"/swagger/{desc.GroupName}/swagger.json", $"API {desc.GroupName.ToUpperInvariant()}");
 		}
 	});
 }
