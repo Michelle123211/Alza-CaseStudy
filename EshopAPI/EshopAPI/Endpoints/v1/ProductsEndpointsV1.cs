@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.HttpResults;
 using EshopAPI.DTOs;
 using EshopAPI.Entities;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 
 namespace EshopAPI.Endpoints.v1;
@@ -48,40 +50,59 @@ public static class ProductsEndpointsV1 {
 	}
 
 	// Gets a list of all products (optionally only those in stock).
-	internal static async Task<IResult> GetProducts(
+	internal static async Task<Ok<List<ProductDto>>> GetProducts(
 			[FromServices] IProductsRepository db,
 			[FromQuery(Name = "in_stock")] bool inStock = false) {
-		return TypedResults.Forbid();
+
+		// TODO: Get all (available) products from the database, map to ProductDto
+		return TypedResults.Ok(new List<ProductDto>());
 	}
 
 	// Gets a product based on its ID.
-	internal static async Task<IResult> GetProductById(
+	internal static async Task<Results<Ok<ProductDto>, NotFound<string>>> GetProductById(
 			[FromServices] IProductsRepository db,
 			[FromRoute] int id) {
-		return TypedResults.Forbid();
+
+		// TODO: Get a product with the given ID, map to ProductDto
+		return TypedResults.NotFound("Product with the given ID doesn't exist.");
 	}
 
 	// Creates a new product with the given details.
-	internal static async Task<IResult> CreateProduct(
+	internal static async Task<Results<CreatedAtRoute<ProductDto>, BadRequest<string>>> CreateProduct(
 			[FromServices] IProductsRepository db,
 			[FromBody] ProductCreateDto product) {
-		return TypedResults.Forbid();
+
+		// TODO: Validate provided parameters (required (not null, not empty), non-negative)
+		// TODO: Create a Product instance (map to Product)
+		// TODO: Add the new product to the database
+		// TODO: Return result mapped to ProductDto
+		return TypedResults.BadRequest("The provided properties are invalid.");
 	}
 
 	// Updates details of a product with the given ID.
-	internal static async Task<IResult> UpdateProduct(
+	internal static async Task<Results<Ok<ProductDto>, NotFound<string>, BadRequest<string>>> UpdateProduct(
 			[FromServices] IProductsRepository db,
 			[FromRoute] int id,
 			[FromBody] ProductUpdateDto productUpdate) {
-		return TypedResults.Forbid();
+
+		// TODO: Validate provided parameters (non-negative, required (either null or something, not empty))
+		// TODO: Get a product with the given ID
+		// TODO: Update information based on provided parameters (map ProductUpdateDto to Product, only non-nulls considered)
+		// TODO: Return result mapped to ProductDto
+		return TypedResults.NotFound("Product with the given ID doesn't exist.");
 	}
 
 	// Updates a quantity of a product with the given ID.
-	internal static async Task<IResult> UpdateProductQuantity(
+	internal static async Task<Results<Ok<ProductDto>, NotFound<string>, BadRequest<string>>> UpdateProductQuantity(
 			[FromServices] IProductsRepository db,
 			[FromRoute] int id,
 			[FromQuery(Name = "quantity_delta")] int quantityDelta) {
-		return TypedResults.Forbid();
+
+		// TODO: Get a product with the given ID
+		// TODO: Validate provided parameter
+		// TODO: Update quantity with the given delta
+		// TODO: Return result mapped to ProductDto
+		return TypedResults.NotFound("Product with the given ID doesn't exist.");
 	}
 
 }

@@ -1,4 +1,5 @@
-﻿using EshopAPI.Entities;
+﻿using EshopAPI.DTOs;
+using EshopAPI.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EshopAPI.Endpoints.v2;
@@ -42,13 +43,15 @@ public static class ProductsEndpointsV2 {
 			[FromQuery(Name = "in_stock")] bool inStock = false,
 			[FromQuery(Name = "page")] int page = 0,
 			[FromQuery(Name = "page_size")] int pageSize = 10) {
+
 		return TypedResults.Forbid();
 	}
 
 	// Updates details of a product with the given ID (by enqueuing the request into an asynchronous queue).
 	internal static async Task<IResult> EnqueueProductUpdate(
 			[FromServices] IProductsRepository db,
-			[FromRoute] int id) { // TODO: ProductUpdateDto
+			[FromBody] ProductUpdateDto productUpdate) {
+
 		return TypedResults.Forbid();
 	}
 
@@ -57,6 +60,7 @@ public static class ProductsEndpointsV2 {
 			[FromServices] IProductsRepository db,
 			[FromRoute] int id,
 			[FromQuery(Name = "quantity_delta")] int quantityDelta) {
+
 		return TypedResults.Forbid();
 	}
 

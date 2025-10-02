@@ -42,7 +42,7 @@ public interface IProductsRepository {
 	/// </summary>
 	/// <param name="product">Details of the product to be updated.</param>
 	/// <returns>The updated product (or <c>null</c> if not found).</returns>
-	Task<Product?> UpdateProductAsync(Product product);
+	Task<Product> UpdateProductAsync(Product product);
 
 	/// <summary>
 	/// Updates quantity of the product with the given identifier by the given delta.

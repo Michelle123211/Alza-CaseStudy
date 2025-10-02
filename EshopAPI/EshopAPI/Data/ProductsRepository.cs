@@ -42,10 +42,9 @@ public class ProductsRepository : IProductsRepository {
 	}
 
 	/// <inheritdoc/>
-	public async Task<Product?> UpdateProductAsync(Product product) {
-		if (await db.Products.FindAsync(product.Id) is null) return null;
+	public Task<Product> UpdateProductAsync(Product product) {
 		Product updatedProduct = db.Products.Update(product).Entity;
-		return updatedProduct;
+		return Task.FromResult(updatedProduct);
 	}
 
 	/// <inheritdoc/>
