@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EshopAPI.Entities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EshopAPI.Endpoints.v2;
 
@@ -37,6 +38,7 @@ public static class ProductsEndpointsV2 {
 
 	// Gets a single page listing available products (optionally only those in stock).
 	internal static async Task<IResult> GetProductsPaged(
+			[FromServices] IProductsRepository db,
 			[FromQuery(Name = "in_stock")] bool inStock = false,
 			[FromQuery(Name = "page")] int page = 0,
 			[FromQuery(Name = "page_size")] int pageSize = 10) {
@@ -45,12 +47,14 @@ public static class ProductsEndpointsV2 {
 
 	// Updates details of a product with the given ID (by enqueuing the request into an asynchronous queue).
 	internal static async Task<IResult> EnqueueProductUpdate(
+			[FromServices] IProductsRepository db,
 			[FromRoute] int id) { // TODO: ProductUpdateDto
 		return TypedResults.Forbid();
 	}
 
 	// Updates a quantity of a product with the given ID (by enqueuing the request into an asynchronous queue).
 	internal static async Task<IResult> EnqueueProductQuantityUpdate(
+			[FromServices] IProductsRepository db,
 			[FromRoute] int id,
 			[FromQuery(Name = "quantity_delta")] int quantityDelta) {
 		return TypedResults.Forbid();

@@ -1,5 +1,7 @@
-﻿using EshopAPI.DTOs;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using EshopAPI.DTOs;
+using EshopAPI.Entities;
+
 
 namespace EshopAPI.Endpoints.v1;
 
@@ -47,24 +49,28 @@ public static class ProductsEndpointsV1 {
 
 	// Gets a list of all products (optionally only those in stock).
 	internal static async Task<IResult> GetProducts(
+			[FromServices] IProductsRepository db,
 			[FromQuery(Name = "in_stock")] bool inStock = false) {
 		return TypedResults.Forbid();
 	}
 
 	// Gets a product based on its ID.
 	internal static async Task<IResult> GetProductById(
+			[FromServices] IProductsRepository db,
 			[FromRoute] int id) {
 		return TypedResults.Forbid();
 	}
 
 	// Creates a new product with the given details.
 	internal static async Task<IResult> CreateProduct(
+			[FromServices] IProductsRepository db,
 			[FromBody] ProductCreateDto product) {
 		return TypedResults.Forbid();
 	}
 
 	// Updates details of a product with the given ID.
 	internal static async Task<IResult> UpdateProduct(
+			[FromServices] IProductsRepository db,
 			[FromRoute] int id,
 			[FromBody] ProductUpdateDto productUpdate) {
 		return TypedResults.Forbid();
@@ -72,6 +78,7 @@ public static class ProductsEndpointsV1 {
 
 	// Updates a quantity of a product with the given ID.
 	internal static async Task<IResult> UpdateProductQuantity(
+			[FromServices] IProductsRepository db,
 			[FromRoute] int id,
 			[FromQuery(Name = "quantity_delta")] int quantityDelta) {
 		return TypedResults.Forbid();

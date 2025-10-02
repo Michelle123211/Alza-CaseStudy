@@ -1,13 +1,19 @@
 using Asp.Versioning;
+using Microsoft.EntityFrameworkCore;
 using EshopAPI.Configuration;
+using EshopAPI.Data;
 using EshopAPI.Endpoints.v1;
 using EshopAPI.Endpoints.v2;
+using EshopAPI.Entities;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 // Configure versioning
 builder.Services.AddApiVersioning(opts => {
@@ -21,7 +27,25 @@ builder.Services.AddApiVersioning(opts => {
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 
 
+// Configure EF Core (with SQLite database)
+builder.Services.AddDbContext<ProductsDb>(opts => {
+	opts.UseSqlite(builder.Configuration.GetConnectionString("DatabaseConnection"));
+});
+builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
+if (builder.Environment.IsDevelopment())
+	builder.Services.AddDatabaseDeveloperPageExceptionFilter(); // enable displaying database-related exceptions
+
+
 var app = builder.Build();
+
+
+// Make sure DB exists
+using (var scope = app.Services.CreateScope()) {
+	var db = scope.ServiceProvider.GetRequiredService<ProductsDb>();
+	db.Database.EnsureCreated();
+	if (!db.Products.Any())
+		db.Seed();
+}
 
 
 // Distinguish between different API versions
