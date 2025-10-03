@@ -12,11 +12,11 @@ public class ProductCreateDto {
 	[Required]
 
 	/// <summary>Product name.</summary>
-	public required string Name { get; set; }
+	public string Name { get; set; } = string.Empty;
 
 	/// <summary>URL of the main product image.</summary>
 	[Required]
-	public required string MainImageUrl { get; set; }
+	public string MainImageUrl { get; set; } = string.Empty;
 
 	/// <summary>Product price.</summary>
 	public decimal Price { get; set; } = 0;

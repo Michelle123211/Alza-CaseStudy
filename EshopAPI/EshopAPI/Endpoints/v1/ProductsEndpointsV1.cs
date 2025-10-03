@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using EshopAPI.DTOs;
 using EshopAPI.Entities;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text;
 
 
 namespace EshopAPI.Endpoints.v1;
@@ -49,60 +50,133 @@ public static class ProductsEndpointsV1 {
 			.WithDescription("Updates quantity of the product with the given ID by the given delta.");
 	}
 
-	// Gets a list of all products (optionally only those in stock).
+
+	/// <summary>
+	/// Gets a list of all products (optionally only those in stock).
+	/// </summary>
+	/// <param name="db">Products repository.</param>
+	/// <param name="inStock">Optional parameter for filtering only products currently in stock (if <c>true</c>).</param>
+	/// <returns><c>Ok</c> code with the list of products in the response body.</returns>
 	internal static async Task<Ok<List<ProductDto>>> GetProducts(
 			[FromServices] IProductsRepository db,
 			[FromQuery(Name = "in_stock")] bool inStock = false) {
 
-		// TODO: Get all (available) products from the database, map to ProductDto
-		return TypedResults.Ok(new List<ProductDto>());
+		// Get all (available) products from the database, map to ProductDto
+		List<Product> products;
+		if (!inStock) products = await db.GetProductsAsync();
+		else products = await db.GetProductsInStockAsync();
+		List<ProductDto> productDtos = new();
+		foreach (var product in products) productDtos.Add(product.ToProductDto());
+
+		return TypedResults.Ok(productDtos);
 	}
 
-	// Gets a product based on its ID.
+	/// <summary>
+	/// Gets a product based on its ID.
+	/// </summary>
+	/// <param name="db">Products repository.</param>
+	/// <param name="id">Unique identifier of the product to be found.</param>
+	/// <returns><c>Ok</c> code with the product in the response body, or <c>NotFound</c> code with explanation in the response body.</returns>
 	internal static async Task<Results<Ok<ProductDto>, NotFound<string>>> GetProductById(
 			[FromServices] IProductsRepository db,
 			[FromRoute] int id) {
 
-		// TODO: Get a product with the given ID, map to ProductDto
-		return TypedResults.NotFound("Product with the given ID doesn't exist.");
+		// Get a product with the given ID, map to ProductDto
+		return await db.GetProductByIdAsync(id)
+			is Product product
+				? TypedResults.Ok(product.ToProductDto())
+				: TypedResults.NotFound(ErrorMsg.NOT_FOUND);
 	}
 
-	// Creates a new product with the given details.
+	/// <summary>
+	/// Creates a new product with the given details.
+	/// </summary>
+	/// <param name="db">Products repository.</param>
+	/// <param name="product">Details of the product to be created (name and image URL are required).</param>
+	/// <returns><c>Created</c> code, the newly created product's URL in the Location header and the product itself in the response body.</returns>
 	internal static async Task<Results<CreatedAtRoute<ProductDto>, BadRequest<string>>> CreateProduct(
 			[FromServices] IProductsRepository db,
 			[FromBody] ProductCreateDto product) {
 
-		// TODO: Validate provided parameters (required (not null, not empty), non-negative)
-		// TODO: Create a Product instance (map to Product)
-		// TODO: Add the new product to the database
-		// TODO: Return result mapped to ProductDto
-		return TypedResults.BadRequest("The provided properties are invalid.");
+		// Validate provided parameters (required (not null, not empty), non-negative)
+		StringBuilder errors = new StringBuilder()
+			.Append(Validate.Name(product.Name))
+			.Append(Validate.MainImageUrl(product.MainImageUrl))
+			.Append(Validate.Price(product.Price))
+			.Append(Validate.Quantity(product.Quantity));
+		if (errors.Length > 0) return TypedResults.BadRequest(errors.ToString());
+		
+		// Create a Product instance (map to Product) and add it to the database
+		Product newProduct = await db.CreateProductAsync(product.ToProduct());
+		await db.SaveChangesAsync();
+		
+		// Return result mapped to ProductDto
+		ProductDto newProductDto = newProduct.ToProductDto();
+		return TypedResults.CreatedAtRoute(newProductDto, nameof(GetProductById), new { id = newProductDto.Id });
 	}
 
-	// Updates details of a product with the given ID.
+	/// <summary>
+	/// Updates details of a product with the given ID.
+	/// </summary>
+	/// <param name="db">Products repository.</param>
+	/// <param name="id">Unique identifier of the product to be updated.</param>
+	/// <param name="productUpdate">Product details which should be overwritten.</param>
+	/// <returns><c>Ok</c> code with the updated product in the response body, or <c>NotFound</c>/<c>BadRequest</c> code with explanation in the response body.</returns>
 	internal static async Task<Results<Ok<ProductDto>, NotFound<string>, BadRequest<string>>> UpdateProduct(
 			[FromServices] IProductsRepository db,
 			[FromRoute] int id,
 			[FromBody] ProductUpdateDto productUpdate) {
 
-		// TODO: Validate provided parameters (non-negative, required (either null or something, not empty))
-		// TODO: Get a product with the given ID
-		// TODO: Update information based on provided parameters (map ProductUpdateDto to Product, only non-nulls considered)
-		// TODO: Return result mapped to ProductDto
-		return TypedResults.NotFound("Product with the given ID doesn't exist.");
+		// Get a product with the given ID
+		Product? origProduct = await db.GetProductByIdAsync(id);
+		if (origProduct is null) return TypedResults.NotFound(ErrorMsg.NOT_FOUND);
+
+		// Validate provided parameters (non-negative, required (either null or something, not empty))
+		StringBuilder errors = new StringBuilder()
+			.Append(Validate.Name(productUpdate.Name, true))
+			.Append(Validate.MainImageUrl(productUpdate.MainImageUrl, true))
+			.Append(Validate.Price(productUpdate.Price, true))
+			.Append(Validate.Quantity(productUpdate.Quantity, true));
+		if (errors.Length > 0) return TypedResults.BadRequest(errors.ToString());
+
+		// Update information based on provided parameters (map ProductUpdateDto to Product, only non-nulls considered)
+		origProduct.CombineWith(productUpdate);
+		Product newProduct = await db.UpdateProductAsync(origProduct);
+		await db.SaveChangesAsync();
+
+		// Return result mapped to ProductDto
+		return TypedResults.Ok(newProduct.ToProductDto());
 	}
 
-	// Updates a quantity of a product with the given ID.
+	/// <summary>
+	/// Updates a quantity of a product with the given ID.
+	/// </summary>
+	/// <param name="db">Products repository.</param>
+	/// <param name="id">Unique identifier of the product to be updated.</param>
+	/// <param name="quantityDelta">The change in the quantity value (positive to increase stock, negative to decrease).</param>
+	/// <returns><c>Ok</c> code with the updated product in the response body, or <c>NotFound</c>/<c>BadRequest</c> code with explanation in the response body.</returns>
 	internal static async Task<Results<Ok<ProductDto>, NotFound<string>, BadRequest<string>>> UpdateProductQuantity(
 			[FromServices] IProductsRepository db,
 			[FromRoute] int id,
 			[FromQuery(Name = "quantity_delta")] int quantityDelta) {
 
-		// TODO: Get a product with the given ID
-		// TODO: Validate provided parameter
-		// TODO: Update quantity with the given delta
-		// TODO: Return result mapped to ProductDto
-		return TypedResults.NotFound("Product with the given ID doesn't exist.");
+		// Get a product with the given ID
+		Product? origProduct = await db.GetProductByIdAsync(id);
+		if (origProduct is null) return TypedResults.NotFound(ErrorMsg.NOT_FOUND);
+
+		// Validate provided parameter
+		StringBuilder errors = new StringBuilder()
+			.Append(Validate.Quantity(origProduct.Quantity, quantityDelta));
+		if (errors.Length > 0) return TypedResults.BadRequest(errors.ToString());
+
+		// Update quantity with the given delta
+		Product? product = await db.UpdateProductQuantityAsync(id, quantityDelta);
+		await db.SaveChangesAsync();
+
+		// Return result mapped to ProductDto
+		return product is null
+			? TypedResults.NotFound(ErrorMsg.NOT_FOUND)
+			: TypedResults.Ok(product.ToProductDto());
 	}
 
 }
