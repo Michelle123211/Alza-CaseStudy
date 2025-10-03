@@ -8,13 +8,14 @@ namespace EshopAPI;
 /// A static class containing frequently used error messages as constants.
 /// </summary>
 public static class ErrorMsg {
-	public const string NOT_FOUND = "Product with the given ID doesn't exist. ";
+	public const string PRODUCT_NOT_FOUND = "Product with the given ID doesn't exist. ";
 	public const string EMPTY_NAME = "Product's name cannot be empty. ";
 	public const string EMPTY_IMAGE_URL = "Product's image URL cannot be empty. ";
 	public const string NEGATIVE_PRICE = "Product's price must be greater than or equal to zero. ";
 	public const string NEGATIVE_QUANTITY = "Product's quantity must be greater than or equal to zero. ";
 	public const string NEGATIVE_PAGE = "Page must be greater than or equal to zero. ";
 	public const string NON_POSITIVE_PAGE_SIZE = "Page size must be greater than zero. ";
+	public const string STATUS_NOT_FOUND = "Update request with the given ID doesn't exist. ";
 	public const string SUCCESS = "";
 }
 

@@ -1,10 +1,14 @@
 using Asp.Versioning;
-using Microsoft.EntityFrameworkCore;
 using EshopAPI.Configuration;
 using EshopAPI.Data;
+using EshopAPI.DTOs;
 using EshopAPI.Endpoints.v1;
 using EshopAPI.Endpoints.v2;
 using EshopAPI.Entities;
+using EshopAPI.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
+using System.Reflection.Metadata.Ecma335;
 
 
 
@@ -13,6 +17,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+// Asynchronous queue
+builder.Services.AddSingleton<IProductUpdateQueue>(opts => new ProductUpdateQueue());
+builder.Services.AddSingleton<ConcurrentDictionary<string, QueuedUpdateResult>>(); // storing status of update requests
+builder.Services.AddHostedService<ProductUpdateService>();
 
 
 // Configure versioning

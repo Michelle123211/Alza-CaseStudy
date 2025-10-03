@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using EshopAPI.DTOs;
 using EshopAPI.Entities;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Text;
 
 
@@ -86,7 +85,7 @@ public static class ProductsEndpointsV1 {
 		return await db.GetProductByIdAsync(id)
 			is Product product
 				? TypedResults.Ok(product.ToProductDto())
-				: TypedResults.NotFound(ErrorMsg.NOT_FOUND);
+				: TypedResults.NotFound(ErrorMsg.PRODUCT_NOT_FOUND);
 	}
 
 	/// <summary>
@@ -130,7 +129,7 @@ public static class ProductsEndpointsV1 {
 
 		// Get a product with the given ID
 		Product? origProduct = await db.GetProductByIdAsync(id);
-		if (origProduct is null) return TypedResults.NotFound(ErrorMsg.NOT_FOUND);
+		if (origProduct is null) return TypedResults.NotFound(ErrorMsg.PRODUCT_NOT_FOUND);
 
 		// Validate provided parameters (non-negative, required (either null or something, not empty))
 		StringBuilder errors = new StringBuilder()
@@ -163,7 +162,7 @@ public static class ProductsEndpointsV1 {
 
 		// Get a product with the given ID
 		Product? origProduct = await db.GetProductByIdAsync(id);
-		if (origProduct is null) return TypedResults.NotFound(ErrorMsg.NOT_FOUND);
+		if (origProduct is null) return TypedResults.NotFound(ErrorMsg.PRODUCT_NOT_FOUND);
 
 		// Validate provided parameter
 		StringBuilder errors = new StringBuilder()
@@ -176,7 +175,7 @@ public static class ProductsEndpointsV1 {
 
 		// Return result mapped to ProductDto
 		return product is null
-			? TypedResults.NotFound(ErrorMsg.NOT_FOUND)
+			? TypedResults.NotFound(ErrorMsg.PRODUCT_NOT_FOUND)
 			: TypedResults.Ok(product.ToProductDto());
 	}
 
