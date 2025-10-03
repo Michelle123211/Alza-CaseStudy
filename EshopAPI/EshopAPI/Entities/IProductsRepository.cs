@@ -26,7 +26,7 @@ public interface IProductsRepository {
 	/// <summary>
 	/// Gets a single product based on its identifier.
 	/// </summary>
-	/// <param name="id">Unique identifier of the product to ne found.</param>
+	/// <param name="id">Unique identifier of the product to be found.</param>
 	/// <returns>A product with the given ID (or <c>null</c> if not found).</returns>
 	Task<Product?> GetProductByIdAsync(int id);
 
