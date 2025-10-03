@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Text;
 using EshopAPI.DTOs;
 using EshopAPI.Entities;
-using System.Text;
 
 
 namespace EshopAPI.Endpoints.v1;

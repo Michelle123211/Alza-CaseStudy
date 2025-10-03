@@ -8,8 +8,6 @@ using EshopAPI.Entities;
 using EshopAPI.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
-using System.Reflection.Metadata.Ecma335;
-
 
 
 var builder = WebApplication.CreateBuilder(args);

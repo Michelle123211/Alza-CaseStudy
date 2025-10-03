@@ -1,6 +1,5 @@
-﻿using EshopAPI.DTOs;
+﻿using Microsoft.EntityFrameworkCore;
 using EshopAPI.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace EshopAPI.Data;
 

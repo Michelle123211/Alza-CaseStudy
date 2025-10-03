@@ -1,6 +1,6 @@
-﻿using EshopAPI.DTOs;
+﻿using System.Text;
+using EshopAPI.DTOs;
 using EshopAPI.Entities;
-using System.Text;
 
 namespace EshopAPI.Infrastructure;
 

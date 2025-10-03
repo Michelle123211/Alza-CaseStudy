@@ -1,11 +1,8 @@
-﻿using EshopAPI.DTOs;
-using EshopAPI.Endpoints.v2;
-using EshopAPI.Entities;
-using EshopAPI.Infrastructure;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using System.Collections.Concurrent;
-using System.Data;
-using System.Xml.Linq;
+using EshopAPI.DTOs;
+using EshopAPI.Endpoints.v2;
+using EshopAPI.Infrastructure;
 using Tests.Mocks;
 
 namespace Tests.EndpointTests.v2;

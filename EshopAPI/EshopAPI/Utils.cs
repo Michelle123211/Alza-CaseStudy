@@ -1,8 +1,4 @@
-﻿using EshopAPI.Entities;
-using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace EshopAPI;
+﻿namespace EshopAPI;
 
 /// <summary>
 /// A static class containing frequently used error messages as constants.
