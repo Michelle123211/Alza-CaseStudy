@@ -1,5 +1,6 @@
 ﻿using EshopAPI.DTOs;
 using EshopAPI.Entities;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EshopAPI.Endpoints.v2;
@@ -38,13 +39,18 @@ public static class ProductsEndpointsV2 {
 	}
 
 	// Gets a single page listing available products (optionally only those in stock).
-	internal static async Task<IResult> GetProductsPaged(
+	internal static async Task<Results<Ok<PagedResponseDto<ProductDto>>, BadRequest<string>>> GetProductsPaged(
+			HttpContext httpContext,
 			[FromServices] IProductsRepository db,
 			[FromQuery(Name = "in_stock")] bool inStock = false,
 			[FromQuery(Name = "page")] int page = 0,
 			[FromQuery(Name = "page_size")] int pageSize = 10) {
 
-		return TypedResults.Forbid();
+		// TODO: Validate provided parameters (positive/non-negative, in range)
+		// TODO: Get corresponding (available) products from the database, map to ProductDto and PagedResponseDto
+		// TODO: Set Link header
+
+		return TypedResults.Ok<PagedResponseDto<ProductDto>>(null);
 	}
 
 	// Updates details of a product with the given ID (by enqueuing the request into an asynchronous queue).

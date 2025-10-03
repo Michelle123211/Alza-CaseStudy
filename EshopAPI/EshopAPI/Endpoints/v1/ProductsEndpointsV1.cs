@@ -39,6 +39,7 @@ public static class ProductsEndpointsV1 {
 			.WithDescription("Creates a new product with the details given in the request body.");
 
 		productsGroup.MapPatch("/{id:int}", UpdateProduct)
+			.MapToApiVersion(1)
 			.WithName(nameof(UpdateProduct))
 			.WithSummary("Updates a single product by ID.")
 			.WithDescription("(Partially) updates the product of the given ID with the details given in the request body.");

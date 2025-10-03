@@ -1,4 +1,5 @@
-﻿using EshopAPI.Entities;
+﻿using EshopAPI.Data;
+using EshopAPI.Entities;
 
 namespace Tests.Mocks;
 
@@ -50,10 +51,37 @@ internal class ProductsRepositoryMock : IProductsRepository {
 		return Task.FromResult(Products);
 	}
 
+	/// <summary>
+	/// Increments counter of <c>GetProductsPageAsync()</c> method calls and returns a list of all products on the given page.
+	/// </summary>
+	/// <param name="page">Page number to get (0 is the first page).</param>
+	/// <param name="pageSize">Number of products on a single page.</param>
+	/// <returns>Products associated with the given page.</returns>
+
+	public Task<PagedResponse<Product>> GetProductsPageAsync(int page, int pageSize) {
+		MethodCalls[nameof(GetProductsPageAsync)] = 1 + MethodCalls.GetValueOrDefault(nameof(GetProductsPageAsync), 0);
+		List<Product> items = Products.Skip(page * pageSize).Take(page).ToList();
+
+		return Task.FromResult(new PagedResponse<Product>(items, page, pageSize, Products.Count));
+	}
+
 	/// <summary>Increments counter of <c>GetProductsInStockAsync()</c> method calls and returns a list of all products in stock.</summary>
 	public Task<List<Product>> GetProductsInStockAsync() {
 		MethodCalls[nameof(GetProductsInStockAsync)] = 1 + MethodCalls.GetValueOrDefault(nameof(GetProductsInStockAsync), 0);
 		return Task.FromResult(Products.Where(p => p.Quantity > 0).ToList());
+	}
+
+	/// <summary>
+	/// Increments counter of <c>GetProductsInStockPageAsync()</c> method calls and returns a list of products in stock on the given page.
+	/// </summary>
+	/// <param name="page">Page number to get (0 is the first page).</param>
+	/// <param name="pageSize">Number of products on a single page.</param>
+	/// <returns>Products in stock associated with the given page.</returns>
+	public Task<PagedResponse<Product>> GetProductsInStockPageAsync(int page, int pageSize) {
+		MethodCalls[nameof(GetProductsInStockPageAsync)] = 1 + MethodCalls.GetValueOrDefault(nameof(GetProductsInStockPageAsync), 0);
+		List<Product> productsInStock = Products.Where(p => p.Quantity > 0).ToList();
+
+		return Task.FromResult(new PagedResponse<Product>(productsInStock.Skip(page * pageSize).Take(page).ToList(), page, pageSize, productsInStock.Count));
 	}
 
 	/// <summary>

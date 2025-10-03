@@ -1,4 +1,5 @@
-﻿using EshopAPI.Entities;
+﻿using EshopAPI.DTOs;
+using EshopAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EshopAPI.Data;
@@ -22,12 +23,32 @@ public class ProductsRepository : IProductsRepository {
 
 	/// <inheritdoc/>
 	public async Task<List<Product>> GetProductsAsync() {
-		return await db.Products.ToListAsync();
+		return await db.Products.AsNoTracking().ToListAsync();
+	}
+
+	/// <inheritdoc/>
+	public async Task<PagedResponse<Product>> GetProductsPageAsync(int page, int pageSize) {
+		int totalItems = await db.Products.AsNoTracking().CountAsync();
+		List<Product> products = await db.Products.AsNoTracking().OrderBy(p => p.Id)
+			.Skip(page * pageSize)
+			.Take(pageSize).ToListAsync();
+
+		return new PagedResponse<Product>(products, page, pageSize, totalItems);
 	}
 
 	/// <inheritdoc/>
 	public async Task<List<Product>> GetProductsInStockAsync() {
-		return await db.Products.Where(p => p.Quantity > 0).ToListAsync();
+		return await db.Products.AsNoTracking().Where(p => p.Quantity > 0).ToListAsync();
+	}
+
+	/// <inheritdoc/>
+	public async Task<PagedResponse<Product>> GetProductsInStockPageAsync(int page, int pageSize) {
+		int totalItems = await db.Products.Where(p => p.Quantity > 0).AsNoTracking().CountAsync();
+		List<Product> products = await db.Products.AsNoTracking().Where(p => p.Quantity > 0).OrderBy(p => p.Id)
+			.Skip(page * pageSize)
+			.Take(pageSize).ToListAsync();
+
+		return new PagedResponse<Product>(products, page, pageSize, totalItems);
 	}
 
 	/// <inheritdoc/>

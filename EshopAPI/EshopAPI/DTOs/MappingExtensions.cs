@@ -1,4 +1,5 @@
-﻿using EshopAPI.Entities;
+﻿using EshopAPI.Data;
+using EshopAPI.Entities;
 
 namespace EshopAPI.DTOs;
 
@@ -49,6 +50,22 @@ public static class MappingExtensions {
 		product.Price = productUpdate.Price ?? product.Price;
 		product.Description = productUpdate.Description ?? product.Description;
 		product.Quantity = productUpdate.Quantity ?? product.Quantity;
+	}
+
+	/// <summary>
+	/// Maps data from internal representation of paged response to the one used for external communication.
+	/// </summary>
+	/// <typeparam name="T">Type of items on the page.</typeparam>
+	/// <param name="pagedResponse"><c>PagedResponse</c> to be mapped.</param>
+	/// <returns><c>PagedResponseDto</c> representation of the given product (with properties copied over).</returns>
+	public static PagedResponseDto<T> ToPagedResponseDto<T>(this PagedResponse<T> pagedResponse) {
+		return new PagedResponseDto<T>() {
+			Items = pagedResponse.Items,
+			PageNumber = pagedResponse.PageNumber,
+			PageSize = pagedResponse.PageSize,
+			TotalItems = pagedResponse.TotalItems,
+			TotalPages = pagedResponse.TotalPages
+		};
 	}
 
 }

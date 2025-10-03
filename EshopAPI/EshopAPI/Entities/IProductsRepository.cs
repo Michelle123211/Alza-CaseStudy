@@ -1,4 +1,6 @@
-﻿namespace EshopAPI.Entities;
+﻿using EshopAPI.Data;
+
+namespace EshopAPI.Entities;
 
 /// <summary>
 /// An interface representing products repository and basic interactions with it.
@@ -18,10 +20,26 @@ public interface IProductsRepository {
 	Task<List<Product>> GetProductsAsync();
 
 	/// <summary>
+	/// Gets a single page of products.
+	/// </summary>
+	/// <param name="page">Page number to get (0 is the first page).</param>
+	/// <param name="pageSize">Number of products on a single page.</param>
+	/// <returns>Products associated with the given page.</returns>
+	Task<PagedResponse<Product>> GetProductsPageAsync(int page, int pageSize);
+
+	/// <summary>
 	/// Gets a list of all products from the products repository which are in stock.
 	/// </summary>
 	/// <returns>All products in stock.</returns>
 	Task<List<Product>> GetProductsInStockAsync();
+
+	/// <summary>
+	/// Gets a single page of products in stock.
+	/// </summary>
+	/// <param name="page">Page number to get (0 is the first page).</param>
+	/// <param name="pageSize">Number of products on a single page.</param>
+	/// <returns>Products in stock associated with the given page.</returns>
+	Task<PagedResponse<Product>> GetProductsInStockPageAsync(int page, int pageSize);
 
 	/// <summary>
 	/// Gets a single product based on its identifier.
