@@ -1,10 +1,10 @@
-﻿using EshopAPI.Data;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using EshopAPI;
 using EshopAPI.DTOs;
 using EshopAPI.Endpoints.v2;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Tests.Mocks;
+using Microsoft.AspNetCore.Routing;
 
 namespace Tests.EndpointTests.v2;
 
@@ -15,11 +15,7 @@ namespace Tests.EndpointTests.v2;
 public class GetProductsPageTests {
 
 	private readonly ProductsRepositoryMock productsMock = new();
-
-	private const string X_PAGE = "X-Page";
-	private const string X_PAGE_SIZE = "X-Page-Size";
-	private const string X_TOTAL_PAGES = "X-Total-Pages";
-	private const string X_TOTAL_ITEMS = "X-Total-Items";
+	private readonly LinkGeneratorMock links = new();
 
 	private const int DEFAULT_PAGE = 0;
 	private const int DEFAULT_PAGE_SIZE = 10;
@@ -27,7 +23,7 @@ public class GetProductsPageTests {
 	private int TotalItemsCount => productsMock.Products.Count;
 
 	private int GetPageCount(int pageSize) => (int)Math.Ceiling((double)TotalItemsCount / pageSize);
-	private int GetItemsOnPage(int pageSize, int page) => TotalItemsCount - (page * pageSize);
+	private int GetItemsOnPage(int pageSize, int page) => Math.Min(pageSize, TotalItemsCount - (page * pageSize));
 
 	public GetProductsPageTests() {
 		productsMock.Reset(54);
@@ -39,7 +35,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(null, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock);
 		// Assert
 		// ... type of result
 		Assert.IsType<Ok<PagedResponseDto<ProductDto>>>(act.Result);
@@ -53,7 +49,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(null, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock);
 		// Assert
 		// ... Link header
 		string linkHeader = httpContext.Response.Headers.Link.ToString();
@@ -61,17 +57,17 @@ public class GetProductsPageTests {
 		Assert.Contains("first", linkHeader);
 		Assert.Contains("last", linkHeader);
 		// ... custom headers
-		Assert.Equal($"{DEFAULT_PAGE}", httpContext.Response.Headers[X_PAGE]);
-		Assert.Equal($"{DEFAULT_PAGE_SIZE}", httpContext.Response.Headers[X_PAGE_SIZE]);
-		Assert.Equal($"{GetPageCount(DEFAULT_PAGE_SIZE)}", httpContext.Response.Headers[X_TOTAL_PAGES]);
-		Assert.Equal($"{TotalItemsCount}", httpContext.Response.Headers[X_TOTAL_ITEMS]);
+		Assert.Equal($"{DEFAULT_PAGE}", httpContext.Response.Headers[Header.PAGE]);
+		Assert.Equal($"{DEFAULT_PAGE_SIZE}", httpContext.Response.Headers[Header.PAGE_SIZE]);
+		Assert.Equal($"{GetPageCount(DEFAULT_PAGE_SIZE)}", httpContext.Response.Headers[Header.TOTAL_PAGES]);
+		Assert.Equal($"{TotalItemsCount}", httpContext.Response.Headers[Header.TOTAL_ITEMS]);
 	}
 	[Fact]
 	public async Task When_DefaultPageAndSize_Then_ReturnPage() {
 		// Arrange
 		var httpContext = PrepareHttpContext(null, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock);
 		// Assert
 		// ... output data
 		var result = act.Result as Ok<PagedResponseDto<ProductDto>>;
@@ -96,7 +92,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(null, pageSize);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, pageSize: pageSize);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, pageSize: pageSize);
 		// Assert
 		// ... type of result
 		Assert.IsType<Ok<PagedResponseDto<ProductDto>>>(act.Result);
@@ -113,7 +109,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(null, pageSize);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, pageSize: pageSize);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, pageSize: pageSize);
 		// Assert
 		// ... Link header
 		string linkHeader = httpContext.Response.Headers.Link.ToString();
@@ -121,10 +117,10 @@ public class GetProductsPageTests {
 		Assert.Contains("first", linkHeader);
 		Assert.Contains("last", linkHeader);
 		// ... custom headers
-		Assert.Equal($"{DEFAULT_PAGE}", httpContext.Response.Headers[X_PAGE]);
-		Assert.Equal($"{pageSize}", httpContext.Response.Headers[X_PAGE_SIZE]);
-		Assert.Equal($"{GetPageCount(pageSize)}", httpContext.Response.Headers[X_TOTAL_PAGES]);
-		Assert.Equal($"{TotalItemsCount}", httpContext.Response.Headers[X_TOTAL_ITEMS]);
+		Assert.Equal($"{DEFAULT_PAGE}", httpContext.Response.Headers[Header.PAGE]);
+		Assert.Equal($"{pageSize}", httpContext.Response.Headers[Header.PAGE_SIZE]);
+		Assert.Equal($"{GetPageCount(pageSize)}", httpContext.Response.Headers[Header.TOTAL_PAGES]);
+		Assert.Equal($"{TotalItemsCount}", httpContext.Response.Headers[Header.TOTAL_ITEMS]);
 	}
 	[Theory]
 	[InlineData(4)]
@@ -134,7 +130,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(null, pageSize);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, pageSize: pageSize);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, pageSize: pageSize);
 		// Assert
 		// ... output data
 		var result = act.Result as Ok<PagedResponseDto<ProductDto>>;
@@ -159,7 +155,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(page, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, page: page);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, page: page);
 		// Assert
 		// ... type of result
 		Assert.IsType<Ok<PagedResponseDto<ProductDto>>>(act.Result);
@@ -177,7 +173,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(page, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, page: page);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, page: page);
 		// Assert
 		// ... Link header
 		string linkHeader = httpContext.Response.Headers.Link.ToString();
@@ -185,10 +181,10 @@ public class GetProductsPageTests {
 		Assert.Contains("first", linkHeader);
 		Assert.Contains("last", linkHeader);
 		// ... custom headers
-		Assert.Equal($"{page}", httpContext.Response.Headers[X_PAGE]);
-		Assert.Equal($"{DEFAULT_PAGE_SIZE}", httpContext.Response.Headers[X_PAGE_SIZE]);
-		Assert.Equal($"{GetPageCount(DEFAULT_PAGE_SIZE)}", httpContext.Response.Headers[X_TOTAL_PAGES]);
-		Assert.Equal($"{TotalItemsCount}", httpContext.Response.Headers[X_TOTAL_ITEMS]);
+		Assert.Equal($"{page}", httpContext.Response.Headers[Header.PAGE]);
+		Assert.Equal($"{DEFAULT_PAGE_SIZE}", httpContext.Response.Headers[Header.PAGE_SIZE]);
+		Assert.Equal($"{GetPageCount(DEFAULT_PAGE_SIZE)}", httpContext.Response.Headers[Header.TOTAL_PAGES]);
+		Assert.Equal($"{TotalItemsCount}", httpContext.Response.Headers[Header.TOTAL_ITEMS]);
 	}
 	[Theory]
 	[InlineData(0)]
@@ -199,7 +195,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(page, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, page: page);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, page: page);
 		// Assert
 		// ... output data
 		var result = act.Result as Ok<PagedResponseDto<ProductDto>>;
@@ -225,7 +221,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(page, pageSize);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, page: page, pageSize: pageSize);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, page: page, pageSize: pageSize);
 		// Assert
 		// ... type of result
 		Assert.IsType<Ok<PagedResponseDto<ProductDto>>>(act.Result);
@@ -244,7 +240,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(page, pageSize);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, page: page, pageSize: pageSize);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, page: page, pageSize: pageSize);
 		// Assert
 		// ... Link header
 		string linkHeader = httpContext.Response.Headers.Link.ToString();
@@ -252,10 +248,10 @@ public class GetProductsPageTests {
 		Assert.Contains("first", linkHeader);
 		Assert.Contains("last", linkHeader);
 		// ... custom headers
-		Assert.Equal($"{page}", httpContext.Response.Headers[X_PAGE]);
-		Assert.Equal($"{pageSize}", httpContext.Response.Headers[X_PAGE_SIZE]);
-		Assert.Equal($"{GetPageCount(pageSize)}", httpContext.Response.Headers[X_TOTAL_PAGES]);
-		Assert.Equal($"{TotalItemsCount}", httpContext.Response.Headers[X_TOTAL_ITEMS]);
+		Assert.Equal($"{page}", httpContext.Response.Headers[Header.PAGE]);
+		Assert.Equal($"{pageSize}", httpContext.Response.Headers[Header.PAGE_SIZE]);
+		Assert.Equal($"{GetPageCount(pageSize)}", httpContext.Response.Headers[Header.TOTAL_PAGES]);
+		Assert.Equal($"{TotalItemsCount}", httpContext.Response.Headers[Header.TOTAL_ITEMS]);
 	}
 	[Theory]
 	[InlineData(0, 3)]
@@ -267,7 +263,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(page, pageSize);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, page: page, pageSize: pageSize);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, page: page, pageSize: pageSize);
 		// Assert
 		// ... output data
 		var result = act.Result as Ok<PagedResponseDto<ProductDto>>;
@@ -288,7 +284,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(null, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock);
 		// Assert
 		// ... Link header
 		string linkHeader = httpContext.Response.Headers.Link.ToString();
@@ -300,7 +296,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(0, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, page: 0);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, page: 0);
 		// Assert
 		// ... Link header
 		string linkHeader = httpContext.Response.Headers.Link.ToString();
@@ -313,7 +309,7 @@ public class GetProductsPageTests {
 		int page = 2;
 		var httpContext = PrepareHttpContext(page, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, page: page);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, page: page);
 		// Assert
 		// ... Link header
 		string linkHeader = httpContext.Response.Headers.Link.ToString();
@@ -326,7 +322,7 @@ public class GetProductsPageTests {
 		int page = GetPageCount(DEFAULT_PAGE_SIZE) - 1;
 		var httpContext = PrepareHttpContext(page, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, page: page);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, page: page);
 		// Assert
 		// ... Link header
 		string linkHeader = httpContext.Response.Headers.Link.ToString();
@@ -342,7 +338,7 @@ public class GetProductsPageTests {
 		int page = -5;
 		var httpContext = PrepareHttpContext(page, null);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, page: page);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, page: page);
 		// Assert
 		// ... type of result
 		Assert.IsType<BadRequest<string>>(act.Result);
@@ -359,7 +355,7 @@ public class GetProductsPageTests {
 		// Arrange
 		var httpContext = PrepareHttpContext(null, pageSize);
 		// Act
-		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, productsMock, pageSize: pageSize);
+		var act = await ProductsEndpointsV2.GetProductsPage(httpContext, links, productsMock, pageSize: pageSize);
 		// Assert
 		// ... type of result
 		Assert.IsType<BadRequest<string>>(act.Result);

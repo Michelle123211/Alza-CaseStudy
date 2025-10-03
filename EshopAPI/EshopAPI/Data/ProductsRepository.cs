@@ -43,7 +43,7 @@ public class ProductsRepository : IProductsRepository {
 
 	/// <inheritdoc/>
 	public async Task<PagedResponse<Product>> GetProductsInStockPageAsync(int page, int pageSize) {
-		int totalItems = await db.Products.Where(p => p.Quantity > 0).AsNoTracking().CountAsync();
+		int totalItems = await db.Products.AsNoTracking().Where(p => p.Quantity > 0).CountAsync();
 		List<Product> products = await db.Products.AsNoTracking().Where(p => p.Quantity > 0).OrderBy(p => p.Id)
 			.Skip(page * pageSize)
 			.Take(pageSize).ToListAsync();

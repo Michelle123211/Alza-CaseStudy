@@ -57,10 +57,25 @@ public static class MappingExtensions {
 	/// </summary>
 	/// <typeparam name="T">Type of items on the page.</typeparam>
 	/// <param name="pagedResponse"><c>PagedResponse</c> to be mapped.</param>
-	/// <returns><c>PagedResponseDto</c> representation of the given product (with properties copied over).</returns>
+	/// <returns><c>PagedResponseDto&lt;T&gt;</c> representation of the given product (with properties copied over).</returns>
 	public static PagedResponseDto<T> ToPagedResponseDto<T>(this PagedResponse<T> pagedResponse) {
 		return new PagedResponseDto<T>() {
 			Items = pagedResponse.Items,
+			PageNumber = pagedResponse.PageNumber,
+			PageSize = pagedResponse.PageSize,
+			TotalItems = pagedResponse.TotalItems,
+			TotalPages = pagedResponse.TotalPages
+		};
+	}
+
+	/// <summary>
+	/// Maps internal representation of a products page to the one used for external communication.
+	/// </summary>
+	/// <param name="pagedResponse"><c>PagedResponse&lt;Product&gt;</c> to be mapped.</param>
+	/// <returns><c>PagedResponseDto&lt;ProductDto&gt;</c> representation of the given data (with properties copied over).</returns>
+	public static PagedResponseDto<ProductDto> ToPagedResposeProductDto(this PagedResponse<Product> pagedResponse) {
+		return new PagedResponseDto<ProductDto>() {
+			Items = pagedResponse.Items.Select(p => p.ToProductDto()).ToList(),
 			PageNumber = pagedResponse.PageNumber,
 			PageSize = pagedResponse.PageSize,
 			TotalItems = pagedResponse.TotalItems,

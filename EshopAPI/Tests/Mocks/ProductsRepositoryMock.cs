@@ -62,7 +62,7 @@ internal class ProductsRepositoryMock : IProductsRepository {
 
 	public Task<PagedResponse<Product>> GetProductsPageAsync(int page, int pageSize) {
 		MethodCalls[nameof(GetProductsPageAsync)] = 1 + MethodCalls.GetValueOrDefault(nameof(GetProductsPageAsync), 0);
-		List<Product> items = Products.Skip(page * pageSize).Take(page).ToList();
+		List<Product> items = Products.Skip(page * pageSize).Take(pageSize).ToList();
 
 		return Task.FromResult(new PagedResponse<Product>(items, page, pageSize, Products.Count));
 	}
@@ -83,7 +83,7 @@ internal class ProductsRepositoryMock : IProductsRepository {
 		MethodCalls[nameof(GetProductsInStockPageAsync)] = 1 + MethodCalls.GetValueOrDefault(nameof(GetProductsInStockPageAsync), 0);
 		List<Product> productsInStock = Products.Where(p => p.Quantity > 0).ToList();
 
-		return Task.FromResult(new PagedResponse<Product>(productsInStock.Skip(page * pageSize).Take(page).ToList(), page, pageSize, productsInStock.Count));
+		return Task.FromResult(new PagedResponse<Product>(productsInStock.Skip(page * pageSize).Take(pageSize).ToList(), page, pageSize, productsInStock.Count));
 	}
 
 	/// <summary>

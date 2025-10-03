@@ -13,7 +13,19 @@ public static class ErrorMsg {
 	public const string EMPTY_IMAGE_URL = "Product's image URL cannot be empty. ";
 	public const string NEGATIVE_PRICE = "Product's price must be greater than or equal to zero. ";
 	public const string NEGATIVE_QUANTITY = "Product's quantity must be greater than or equal to zero. ";
+	public const string NEGATIVE_PAGE = "Page must be greater than or equal to zero. ";
+	public const string NON_POSITIVE_PAGE_SIZE = "Page size must be greater than zero. ";
 	public const string SUCCESS = "";
+}
+
+/// <summary>
+/// A static class containing custom headers as constants.
+/// </summary>
+public static class Header {
+	public const string PAGE = "X-Page";
+	public const string PAGE_SIZE = "X-Page-Size";
+	public const string TOTAL_PAGES = "X-Total-Pages";
+	public const string TOTAL_ITEMS = "X-Total-Items";
 }
 
 /// <summary>
@@ -79,6 +91,21 @@ public static class Validate {
 	/// <returns>Error message if the quantity would become invalid, empty string otherwise.</returns>
 	public static string Quantity(int quantity, int delta) { 
 		if (quantity + delta < 0) return ErrorMsg.NEGATIVE_QUANTITY;
+		else return ErrorMsg.SUCCESS;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="page"></param>
+	/// <returns></returns>
+	public static string Page(int page) {
+		if (page < 0) return ErrorMsg.NEGATIVE_PAGE;
+		else return ErrorMsg.SUCCESS;
+	}
+
+	public static string PageSize(int pageSize) {
+		if (pageSize <= 0) return ErrorMsg.NON_POSITIVE_PAGE_SIZE;
 		else return ErrorMsg.SUCCESS;
 	}
 
