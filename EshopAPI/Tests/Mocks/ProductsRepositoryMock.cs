@@ -24,16 +24,18 @@ internal class ProductsRepositoryMock : IProductsRepository {
 	/// <summary>
 	/// Initializes the mock repository with a pre-defined list of products and resets its inner state.
 	/// </summary>
-	public void Reset() { 
+	/// <param name="productsCount">Number of products to be pre-generated (useful for pagination testing).</param>
+	public void Reset(int productsCount = 5) { 
 		Products.Clear();
 		MethodCalls.Clear();
-		for (int i = 1; i <= 5; i++) {
-			Products.Add(new Product { 
-				Id = i, 
-				Name = $"Test Name {i}", 
-				MainImageUrl = $"Test Image {i}", 
-				Description = $"Test Description {i}", 
-				Price = i * 110 + i * 0.1M
+		for (int i = 1; i <= productsCount; i++) {
+			Products.Add(new Product {
+				Id = i,
+				Name = $"Test Name {i}",
+				MainImageUrl = $"Test Image {i}",
+				Description = $"Test Description {i}",
+				Price = i * 110 + i * 0.1M,
+				Quantity = (i % 3 == 0 ? 0 : i * 7) // every third product is not in stock
 			});
 		}
 		nextId = Products.Count + 1;
